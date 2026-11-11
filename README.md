@@ -1,4 +1,4 @@
-# Futures Valuation & Arbitrage Analysis (GPW: KGHM & PKO BP)
+# Futures fair-value analysis and arbitrage backtest (KGHM, PKO)
 
 A Python-based quantitative finance project designed to evaluate stock futures contracts traded on the Warsaw Stock Exchange (GPW), specifically focusing on **KGHM Polska Miedź** and **PKO Bank Polski**. The project implements the classical **cost-of-carry pricing model**, identifies market misalignments, evaluates arbitrage opportunities, and accounts for transaction costs.
 
@@ -19,7 +19,7 @@ futures-arbitrage-analysis/
 ├── src/                   # Core source package
 │   ├── __init__.py
 │   ├── analysis.py        # Spread computation and arbitrage status classification
-│   ├── plotting.py        # Data visualization generator (Matplotlib)
+│   ├── plots.py           # Data visualization generator (Matplotlib)
 │   └── pricing.py         # Cost-of-carry theoretical pricing engine
 │
 ├── Test/                  # Test modules and experimental scripts
@@ -57,16 +57,68 @@ Depending on the relationship between the market futures price and the theoretic
    * **Strategy:** Buy (long) futures contracts and sell (short) the underlying stock.
    *(Note: Execution requires verifying that the absolute spread exceeds transaction costs and borrowing fees).*
 
+---      
 
----
+## Results from spot data (2016-11-10 -> 2026-11-09)
 
-## Key Results & Findings
+All charts use raw (not dividend-adjusted) closing prices.
 
-Based on historical pricing runs across KGHM Polska Miedź and PKO Bank Polski datasets:
+### Normalised prices
+![Normalised prices](output/compare_spot.png)
 
-* **KGHM Contracts:** Demonstrated persistent mispricings during volatile periods (March 2025 – March 2026), with maximum absolute pricing spreads exceeding $78.00$ PLN. Contracts frequently oscillated between overvalued and undervalued states, providing viable windows for cash-and-carry arbitrage once transaction costs are factored in.
-* **PKO BP Contracts:** Showed consistent alignment with theoretical cost-of-carry boundaries during mid-2025, with localized peaks reaching up to $33.59$ PLN spread divergence on July 10, 2025 (S0 = 72.36 vs $F_{market} = 76.13$).
-* **Strategy Execution:** Confirmed that automated theoretical pricing flags successfully isolate optimal entry points for both long futures/short spot and short futures/long spot positions.
+### KGHM
+![KGHM spot plots](output/kghm_spot_plots.png)
 
+### PKO
+![PKO spot plots](output/pko_spot_plots.png)
 
+### Key figures (approximate, read from the charts)
 
+| | KGHM | PKO |
+|---|---|---|
+| Price at start (Nov 2016) | ~85 PLN | ~26 PLN |
+| Price now (Nov 2026) | ~285 PLN | ~117 PLN |
+| Growth, price only | ~3.3x | ~4.3x |
+| Peak | ~390 PLN (early 2026) | ~124 PLN (autumn 2026) |
+| Typical 30-day volatility (annualised) | 0.3 - 0.5 | 0.2 - 0.35 |
+| Highest volatility | ~0.96 (spring 2020) | ~0.88 (early 2022) |
+| Worst drawdown | ~ -64% (March 2020) | ~ -60% (late 2020) |
+| Current drawdown from peak | ~ -30% | ~ -10% |
+| Spot vs moving averages now | below MA 50 and MA 200 | about MA 50, above MA 200 |
+
+## Conclusions
+
+1. **KGHM is the riskier stock.** Its volatility usually sits at 0.3 - 0.5, against
+   0.2 - 0.35 for PKO, and it spent long periods below its previous peak: roughly
+   2017 - 2020, and again from the 2021 high until late 2025, more than four years.
+2. **PKO shows a steadier trend.** Since the 2022 low (~22 PLN) it rose about fivefold,
+   and since 2024 its drawdowns were mostly shallower than 20%.
+3. **Both stocks suffered in the same crises.** In 2020 and in 2022 both had
+   drawdowns of more than 55% and sharp volatility spikes, so holding the two together
+   did not protect against those episodes.
+4. **Outside crises they moved very differently.** From 2023 to 2025 PKO kept rising
+   while KGHM stayed in a range of about 110 - 150 PLN. Then KGHM more than doubled in a
+   few months around the turn of 2025/2026, with volatility near 0.88.
+5. **Current state.** KGHM is about 30% below its early-2026 peak, below both moving
+   averages, with volatility (~0.47) above its usual level. PKO is close to its highs
+   with moderate volatility (~0.3). The moving averages are lagging indicators and are
+   only descriptive here.
+
+### What this means for the futures part of the project (hypotheses to test)
+
+- **Regimes differ a lot.** A futures contract lives for about a year, so one contract
+  can fall into a calm period or into a turbulent one (for example, a contract covering
+  2025 - early 2026 includes KGHM's big rally). Backtest results from a single contract
+  should not be generalised.
+- **Mispricing may widen when volatility spikes** (2020, 2022, 2026), and costs such as
+  margin and short-selling constraints are likely higher then. The charts do not prove
+  this; it should be checked against the futures data.
+- **Constant r and q are a weak assumption over 10 years.** Interest rates changed
+  strongly between these years, so use `--rates` with a WIBOR 3M series, and a
+  dividend yield per year instead of one number.
+- **Dividends affect the comparison.** Raw closes drop on ex-dividend days, and the
+  growth figures above exclude dividends (the real total return is higher).
+
+## Limitations
+- The charts and conclusions are descriptive, based on spot prices only. They are not
+  predictions or investment advice.
