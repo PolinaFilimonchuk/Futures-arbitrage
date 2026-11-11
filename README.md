@@ -64,13 +64,13 @@ Depending on the relationship between the market futures price and the theoretic
 All charts use raw (not dividend-adjusted) closing prices.
 
 ### Normalised prices
-![Normalised prices](output/compare_spot.png)
+![img.png](img.png)
 
 ### KGHM
-![KGHM spot plots](output/kghm_spot_plots.png)
+![img_1.png](img_1.png)
 
 ### PKO
-![PKO spot plots](output/pko_spot_plots.png)
+![img_2.png](img_2.png)
 
 ### Key figures (approximate, read from the charts)
 
